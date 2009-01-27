@@ -5,7 +5,7 @@ module Carter
     end
     
     module ClassMethods
-      def translations_for(*columns)
+      def has_translations_for(*columns)
         # setup only once
         unless included_modules.include? InstanceMethods
           include InstanceMethods
