@@ -1,0 +1,44 @@
+ActiveTranslation
+=================
+
+ActiveTranslation provides translated ActiveRecord database columns in
+a manner that's easily attached/detached to a legacy application by maintaining
+a base translation in the model table as well as alternative translations
+in a translation table.
+
+Requires: Rails 2.2
+
+
+Usage
+=======
+
+For all the models you translate you'll need to add a translation table. For 
+a model like Post, you'll have another table called post_translations:
+
+class CreatePostTranslations < ActiveRecord::Migration
+  def self.up
+    create_table :post_translations, :force => true do |t|
+      # add a column for all columns you want translated
+      t.string :title
+      t.text :body
+      
+			t.references :post
+			t.string :locale, :limit => 8
+    end
+  end
+  
+  def self.down
+    drop_table :post_translations
+  end
+end
+
+In your model you'll use the has_translations_for method:
+
+class Post < ActiveRecord::Base
+	has_translations_for :title, :body
+end
+
+If I18n.locale is set to I18n.default_locale then it'll use the data in
+the posts table. Otherwise it'll use the translated data in post_translations.
+
+Copyright (c) 2009 Carter Parks, released under the MIT license
