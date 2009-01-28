@@ -48,7 +48,7 @@ module Carter
         if language.to_s == I18n.default_locale.to_s
           return self.attributes[field]
         elsif translation = self.translations.find(:first, :conditions => ['locale = ?', language.to_s])
-          return translation.attributes[field]
+          return translation.attributes[field] || attributes[field]
         else
           return self.attributes[field]
         end
