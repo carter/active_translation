@@ -21,6 +21,10 @@ module Carter
               get_translation(column)
             end
             
+            define_method "#{column}_before_type_cast" do
+              get_translation(column)
+            end
+            
             define_method "#{column}=" do |value|
               set_translation(column, value)
             end
