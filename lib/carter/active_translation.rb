@@ -21,6 +21,7 @@ module Carter
               get_translation(column)
             end
             
+            # necessary for providing compatibility to Rails form helpers
             define_method "#{column}_before_type_cast" do
               get_translation(column)
             end
@@ -29,20 +30,35 @@ module Carter
               set_translation(column, value)
             end
           end
+          
+          # before filter for saving translation queue
+          after_save :save_translations
         end
       end
       
     end
     
     module InstanceMethods
+      def save_translations
+        if @translations_to_save && @translations_to_save.any?
+          @translations_to_save.each do |k,t|
+            self.translations << t
+            t.save
+          end
+          @translations_to_save = {}
+        end
+        
+        return true
+      end
+      
       def set_translation(field, value, language=nil)
+        @translations_to_save ||= {}
         language ||= I18n.locale
-        if I18n.locale == I18n.default_locale # if we should use the base then we'll just write an attrib
+        if I18n.locale.to_s == I18n.default_locale.to_s # if we should use the base then we'll just write an attrib
           write_attribute(field, value)
         else
-          translation = self.translations.find_or_initialize_by_locale(I18n.locale.to_s)
-          translation.write_attribute(field, value)
-          translation.save
+          @translations_to_save[language.to_sym] ||= self.translations.find_or_initialize_by_locale(I18n.locale.to_s)
+          @translations_to_save[language.to_sym].write_attribute(field, value)
         end
       end
 
